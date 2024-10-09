@@ -14,27 +14,6 @@ class MissingStudentIdentifier:
         # This list will hold references to all missing students in a class
         self.missing_student_list = []  
 
-    def display_data_structure(self):
-        """
-        Displays the data structure in a tabular format using PrettyTable.
-        The table includes 'Student ID', 'Leave Bit', and 'Present Bit'.
-        """
-        # Initialize a PrettyTable object
-        #table = PrettyTable()
-
-        # Add columns: 'Student ID', 'Leave Bit', 'Present Bit'
-        #table.field_names = ["Student ID", "Leave Bit", "Present Bit"]
-
-        # Add rows from data_structure (which is now a list of lists)
-        for record in self.data_structure:
-            student_id = record[0]
-            leave_bit = record[1]
-            present_bit = record[2]
-            #table.add_row([student_id, leave_bit, present_bit])
-
-        # Print the table
-        #print(table)
-
     def identify_missing_students(self):
         """
         Identifies and prints the status of each student (Present, Absent, or Missing).

@@ -284,7 +284,7 @@ class AttendanceRecordDAO:
         today = date.today()
 
         # Query to get attendance records where the attendance_record_date matches today's date
-        return AttendanceRecord.query.filter_by(attendance_record_date=today).order_by(AttendanceRecord.attendance_record_id).all()
+        return AttendanceRecord.query.filter_by(attendance_record_date=today).all()
 
         
     @staticmethod

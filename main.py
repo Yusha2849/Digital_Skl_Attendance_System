@@ -1,6 +1,6 @@
 from wtforms import BooleanField
 from flask_bootstrap import Bootstrap5
-from units.forms import Config, Login, ForgotPassword, ResetPassword, AddSecretaryForm, AddParentForm, AddStudentForm, GuardianForm, UpdateAttendanceForm, AddEducatorForm, ExemptionForm, GenerateClassListForm, ManageProfileForm, StudentAttendanceForm
+from units.forms import Config, Login, ForgotPassword, ResetPassword, AddSecretaryForm, AddParentForm, AddStudentForm, GuardianForm, UpdateAttendanceForm, AddEducatorForm, ExemptionForm, GenerateClassListForm, ManageProfileForm, StudentAttendanceForm, DisplayForm
 from flask import Flask, jsonify, redirect, session, url_for, request, flash, render_template, current_app, get_flashed_messages
 from units import db, init_app, forms
 from units.dao import AdminDAO, UserDAO, SecretaryDAO, EducatorDAO, GuardianDAO, SchoolClassDAO, StudentDAO, SchoolClassDAO, AttendanceRecordDAO, DatabaseUtilityDAO  #Added UserDAO for login
@@ -184,6 +184,11 @@ def change_password():
 def show_all_admins():
     admins = AdminDAO.get_all_admins()
     return render_template('admin-data.html', admins=admins)
+
+@app.route('/student/all', methods=['GET'])
+def show_all_students():
+    students = StudentDAO.get_all_students()
+    return render_template('student-data.html', students=students)
 
 @app.route('/secretary/all', methods=['GET'])
 def show_all_secretaries():
@@ -622,68 +627,36 @@ def add_absentee_notice_secretary():
                 json.dump(date_list, f, indent=4)
 
             flash("Absentee notice submitted successfully!", "success")
+            return render_template('secretary-dashboard.html')
     return render_template('add-secretary-notice.html', form=form)
 
 # Define the path to the JSON file for storing timestamps
-TIMESTAMP_FILE_PATH = os.path.join(app.instance_path, 'timestamps.json')
 
-# Initialize dependencies for Overseer
-json_manager = JSONTimestampManager(TIMESTAMP_FILE_PATH)
-dao = AttendanceRecordDAO()
-report_generator = MissingStudentReport()
 
-# Initialize and start the Overseer in the background
-overseer = Overseer(json_manager, dao, report_generator)
-overseer.start()  # Start the Overseer background process
-
-@app.route('/missing_students', methods=['GET', 'POST'])
+@app.route('/missing-students', methods=['GET', 'POST'])
 def missing_students():
-    # Step 1: Retrieve today's attendance records using AttendanceRecordDAO
-    attendance_records = AttendanceRecordDAO.get_attendance_records_for_today()
-
-    if not attendance_records:
-        return jsonify({"message": "No attendance records found for today."}), 404
+    with app.app_context():
+        report = overseer.get_overdue_report()
+        print(overseer.get_overdue_report())
+        return render_template('missing-students.html', report=report)
     
-    # Step 2: For each attendance record, identify the missing students
-    result = []
-    for record in attendance_records:
-        attendance_list = record['attendance_list']  # Get the attendance list for the record
-        class_id = record['class_id']
+@app.route('/display-student/<student_num>', methods=['GET', 'POST'])
+def display_student(student_num):
+    # Get the student and guardian information
+    student = StudentDAO.get_student_by_id(student_num)
+    guardian = GuardianDAO.get_guardian_by_id(student.guardian_id)
 
-        # Initialize MissingStudentIdentifier with the attendance list
-        missing_student_identifier = MissingStudentIdentifier(attendance_list)
-        missing_students = missing_student_identifier.get_missing_students()
-
-        # Update the timestamp for this class in the JSON file
-        json_manager.update_timestamp(class_id)
-
-        # Add the result for each class
-        result.append({
-            "attendance_id": record['attendance_id'],
-            "class_id": record['class_id'],
-            "missing_students": missing_students
-        })
-
-    # Step 3: Return the result as a JSON response
-    return jsonify(result), 200
-
+    # Pass the student and guardian info to the HTML template
+    return render_template('display_student.html', 
+                           student=student, 
+                           guardian=guardian)
 
 # Educator routes --------------------------------------------------------------------------------------------------
 @app.route('/educator_dashboard')
 @role_required('e')
 def educator_dashboard():
-    # This is just sample data; replace it with your actual data source. Access the educatorid then query the id in class tbl and return students list.
-    class_list = [
-        {'name': 'Student 1'},
-        {'name': 'Student 2'},
-        {'name': 'Student 3'},
-        {'name': 'Student 4'},
-        {'name': 'Student 5'},
-        {'name': 'Student 6'}
-    ]
-    return render_template('educator-dashboard.html', class_list=class_list)
+    return render_template('educator-dashboard.html')
 
-# NOTICES_PATH = r'C:\Users\Dell\Desktop\Digital_Skl_Attendance_System\instance\notices'
 current_dir = os.path.dirname(os.path.abspath(__file__))
 NOTICES_PATH = os.path.join(current_dir, 'instance', 'notices')
 
@@ -696,8 +669,8 @@ def generate_class_list():
 
     # 2. Set the current date in the form
     form.date.data = datetime.now().strftime('%Y-%m-%d')
-    print(form.validate_on_submit())
-    print(form.errors)
+    # print(form.validate_on_submit())
+    # print(form.errors)
     if request.method == 'POST' and form.validate_on_submit():
         # 3. Extract class ID and query class info
         selected_class_id = form.class_name.data.split(' - ')[-1]
@@ -741,16 +714,19 @@ def generate_class_list():
                 student = StudentDAO.get_student_by_id(student_id)
 
                 if student:
+                    
                     # Create student form
                     student_form = StudentAttendanceForm()
                     student_form.first_name.data = student.first_name
                     student_form.last_name.data = student.last_name
 
                     # Check if student was notified based on JSON
-                    student_form.notified.data = True if student_id in notified_students else False
+                    notified = '1' if student_id in notified_students else '0'
+                    student_form.notified.data = notified  # Set notified status as '1' or '0'
+
 
                     # Set status based on whether the student was notified
-                    if student_form.notified.data:
+                    if student_form.notified.data == '1':
                         student_form.status.data = 'Absent'  # If notified, mark as Absent
                     else:
                         student_form.status.data = 'Present'  # Otherwise, mark as Present
@@ -763,25 +739,27 @@ def generate_class_list():
             # Submit Attendance button logic
             if form.submit_attendance.data:
                 print("Submitting attendance...")
-                attendance_record_list = []
+                attendance_record_dict = {}
 
                 # Iterate through the student forms and extract data
                 print(f"Length of student_ids: {len(student_ids)}, Length of form.students: {len(form.students)}")
                 for student_form, student_id in zip(form.students, student_ids):
-                    notified = 1 if student_form.notified.data else 0  # Boolean to 1/0
+                    notified = int(student_form.notified.data)  # Boolean to 1/0
                     status = 1 if student_form.status.data == 'Present' else 0  # Present -> 1, Absent -> 0
 
                     # Append to attendance record list
-                    attendance_record_list.append([student_id, notified, status])
+                    #attendance_record_list.append([student_id,[notified, status]])
+                    attendance_record_dict[student_id] = [notified, status]
                     print(f"Student ID: {student_id}, Notified: {notified}, Status: {status}")
                 
                 # 6. Add attendance record to the DB
                 attendance_record_date_str = form.date.data  # '2024-10-08'
                 attendance_record_date = datetime.strptime(attendance_record_date_str, '%Y-%m-%d').date()
+                json_manager.update_timestamp
 
                 AttendanceRecordDAO.add_attendance_record(
                     attendance_record_date=attendance_record_date,
-                    attendance_record_list=attendance_record_list,
+                    attendance_record_list=attendance_record_dict,
                     class_id=class_id
                 )
 
@@ -885,14 +863,37 @@ def add_absentee_notice():
 
     return render_template('add-attendance-exemption.html', form=form)
 
+students = [
+    {'first_name': 'John', 'last_name': 'Doe', 'grade': 'A', 'division': '1', 'cell_number': '123-456-7890'},
+    {'first_name': 'Jane', 'last_name': 'Smith', 'grade': 'B', 'division': '2', 'cell_number': '987-654-3210'},
+    {'first_name': 'Alice', 'last_name': 'Johnson', 'grade': 'A', 'division': '1', 'cell_number': '555-444-3333'},
+]
 
+@app.route('/missing', methods=['GET', 'POST'])
+def missing():
+    form = DisplayForm()
+    
+    if form.validate_on_submit():  # Check if the form is submitted
+        return render_template('false-missing.html', form=form, students=students)  # Pass data to the template
+
+    return render_template('false-missing.html', form=form, students=None)  # Show the form but no data yet
 
 if __name__ == "__main__":
     app = initialize_server()
-    '''with app.app_context():
-        DatabaseUtilityDAO.execute_sql_script("static/script.sql")'''
     
-    app.run(debug=True)
+    with app.app_context():
+        TIMESTAMP_FILE_PATH = os.path.join(app.instance_path, 'timestamps.json')
+        #DatabaseUtilityDAO.execute_sql_script("static/script.sql")
+
+        # Initialize your components
+        json_manager = JSONTimestampManager(file_path=TIMESTAMP_FILE_PATH)
+        attendance_dao = AttendanceRecordDAO  # Assuming you have a DB connection setup
+        report_generator = MissingStudentReport()
+
+        # Initialize the Overseer class and start the process
+        overseer = Overseer(json_manager=json_manager, dao=attendance_dao, report_generator=report_generator,app=app)
+        overseer.start()
+        app.run(debug=True)
 
 #     |'-.--._ _________:
 #     |  /    |  __    __\

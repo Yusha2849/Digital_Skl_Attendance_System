@@ -2,125 +2,30 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Missing Students</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-      button {
-        padding: 10px 20px;
-        font-size: 16px;
-        margin: 10px 0;
-      }
-      table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 20px;
-      }
-      th,
-      td {
-        border: 1px solid black;
-        padding: 10px;
-        text-align: left;
-      }
-      .hidden {
-        display: none;
-      }
-    </style>
+    <title>Missing Students Report</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <!-- You can include Bootstrap or other CSS frameworks if desired -->
   </head>
   <body>
-    <h1>Missing Students</h1>
-
-    <!-- Button to search for missing students -->
-    <button id="searchBtn">Search Missing Students</button>
-
-    <!-- Button to display missing students, hidden initially -->
-    <button id="displayBtn" class="hidden">Display Missing Students</button>
-
-    <!-- Table for displaying missing student details -->
-    <div id="resultsContainer" class="hidden">
-      <h2>Missing Students Details</h2>
-      <table id="resultsTable">
-        <thead>
-          <tr>
-            <th>Class ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Parent's Contact</th>
-            <th>Address</th>
-          </tr>
-        </thead>
-        <tbody id="resultsBody">
-          <!-- Dynamic rows will be injected here -->
-        </tbody>
-      </table>
+    <div class="container">
+      <h1>MISSING STUDENT REPORT</h1>
+      <div class="list-container">
+      {% if report %} {% for class_id, record in report.items() %}
+      </h2>Class : {{ class_id }}</h2>
+      {% for student in record %}
+      <ul>
+        <li> Student number :<a href="{{ url_for('display_student', student_num=student) }}"> {{ student }} </a></li>
+      </ul>
+      {% endfor %}
+      <hr> 
+      {% endfor %} 
+      {% else %}
+      <p>No missing students report available.</p>
+      {% endif %}
     </div>
-
-    <script>
-      // JavaScript to manage button functionality and display logic
-      const searchBtn = document.getElementById("searchBtn");
-      const displayBtn = document.getElementById("displayBtn");
-      const resultsContainer = document.getElementById("resultsContainer");
-      const resultsBody = document.getElementById("resultsBody");
-
-      // Placeholder for backend response, currently mock data
-      let missingStudentsData = [];
-
-      searchBtn.addEventListener("click", () => {
-        // Simulate querying missing students
-        alert("Searching for missing students...");
-
-        // Example data for testing purpose
-        missingStudentsData = [
-          {
-            classId: 101,
-            firstName: "John",
-            lastName: "Doe",
-            parentContact: "555-1234",
-            address: "123 Main St",
-          },
-          {
-            classId: 101,
-            firstName: "Jane",
-            lastName: "Smith",
-            parentContact: "555-5678",
-            address: "456 Oak St",
-          },
-          {
-            classId: 102,
-            firstName: "Tom",
-            lastName: "Brown",
-            parentContact: "555-8765",
-            address: "789 Pine St",
-          },
-        ];
-
-        // Display the "Display Missing Students" button
-        displayBtn.classList.remove("hidden");
-      });
-
-      displayBtn.addEventListener("click", () => {
-        // Clear previous data
-        resultsBody.innerHTML = "";
-
-        // Dynamically inject student data into the table
-        missingStudentsData.forEach((student) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-                    <td>${student.classId}</td>
-                    <td>${student.firstName}</td>
-                    <td>${student.lastName}</td>
-                    <td>${student.parentContact}</td>
-                    <td>${student.address}</td>
-                `;
-          resultsBody.appendChild(row);
-        });
-
-        // Display the results table
-        resultsContainer.classList.remove("hidden");
-      });
-    </script>
+    </div>
   </body>
 </html>

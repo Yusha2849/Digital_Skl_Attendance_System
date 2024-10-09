@@ -1,65 +1,64 @@
 {% extends 'base.html' %} {% from 'bootstrap/form.html' import render_form %} {%
-  block title %}Class List{% endblock %} {% block content %}
-  <h1>CLASS LIST</h1>
-  
-  <div class="box" style="width: 100%">
-    <form
-      method="POST"
-      action="{{ url_for('generate_class_list') }}"
-      autocomplete="off"
-    >
-      {{ form.hidden_tag() }}
-      <!-- Includes CSRF token -->
-  
-      <!-- Render main form fields -->
-      <div class="form-group">
-          {{ form.date.label(class="form-label") }} {{
-          form.date(class="form-control") }}
-        </div>
-  
-      <div class="form-group">
-        {{ form.class_name.label(class="form-label") }} {{
-        form.class_name(class="form-control") }}
+block title %}Class List{% endblock %} {% block content %}
+<h1>CLASS LIST</h1>
+
+<div class="box" style="width: 100%">
+  <form
+    method="POST"
+    action="{{ url_for('generate_class_list') }}"
+    autocomplete="off"
+  >
+    {{ form.hidden_tag() }}
+    <!-- Includes CSRF token -->
+
+    <!-- Render main form fields -->
+    <div class="form-group">
+        {{ form.date.label(class="form-label") }} {{
+        form.date(class="form-control") }}
       </div>
-  
-      <div class="form-group">
-        {{ form.educator.label(class="form-label") }} {{
-        form.educator(class="form-control") }}
-      </div>
-  
-      <hr style="border: 1px solid #ccc; margin: 20px 0" />
-  
-      <div class="table-container">
-      <table class="table table-bordered student-list">
-        <thead>
-          <tr>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Notified</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for student_form in form.students %}
-          <tr style="text-align: center">
-            <td>{{ student_form.first_name.data }}</td>
-            <td>{{ student_form.last_name.data }}</td>
-            <td>{% if student_form.notified.data %}No{% else %}Yes{% endif %}</td>
-            <td>{{ student_form.status(class="form-select") }}</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-      <div>
-  
-      <hr style="border: 1px solid #ccc; margin: 20px 0" />
-  
-      <!-- Render the action buttons -->
-      <div class="d-flex justify-content-between">
-        {{ form.generate(class="btn btn-secondary") }} {{
-        form.submit_attendance(class="btn btn-primary") }}
-      </div>
-    </form>
-  </div>
-  {% endblock %}
-  
+
+    <div class="form-group">
+      {{ form.class_name.label(class="form-label") }} {{
+      form.class_name(class="form-control") }}
+    </div>
+
+    <div class="form-group">
+      {{ form.educator.label(class="form-label") }} {{
+      form.educator(class="form-control") }}
+    </div>
+
+    <hr style="border: 1px solid #ccc; margin: 20px 0" />
+
+    <div class="table-container">
+    <table class="table table-bordered student-list">
+      <thead>
+        <tr>
+          <th>First Name</th>
+          <th>Last Name</th>
+          <th>Notified</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for student_form in form.students %}
+        <tr style="text-align: center">
+          <td>{{ student_form.first_name.data }}</td>
+          <td>{{ student_form.last_name.data }}</td>
+          <td>{{ student_form.notified(class="form-select") }}</td>
+          <td>{{ student_form.status(class="form-select") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <div>
+
+    <hr style="border: 1px solid #ccc; margin: 20px 0" />
+
+    <!-- Render the action buttons -->
+    <div class="d-flex justify-content-between">
+      {{ form.generate(class="btn btn-secondary") }} {{
+      form.submit_attendance(class="btn btn-primary") }}
+    </div>
+  </form>
+</div>
+{% endblock %}

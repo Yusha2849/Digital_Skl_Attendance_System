@@ -6,5 +6,8 @@ block title %}Add Student{% endblock %} {% block content %}
   <div class="inputBox">
     <div class="inputBox">{{ render_form(form) }}</div>
   </div>
+  <div class="links">
+    <a href="{{ url_for('show_all_students') }}">Go to Student Data</a>
+  </div>
 </div>
 {% endblock %}

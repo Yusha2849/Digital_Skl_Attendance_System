@@ -29,9 +29,7 @@
         <li><a href="{{ url_for('logout') }}">LOG OUT</a></li>
         {% else %}
         <li><a href="{{ url_for('login') }}">LOG IN</a></li>
-        {% endif %}
-        <li><a href="{{ url_for('generate_class_list') }}">CLASS LIST</a></li>
-        {% if current_user.is_authenticated %}
+        {% endif %} {% if current_user.is_authenticated %}
         <li>
           {% if session['user_type'] == 'a' %}
           <a href="{{ url_for('admin_dashboard') }}">ADMIN DASHBOARD</a>

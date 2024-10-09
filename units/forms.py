@@ -59,8 +59,8 @@ class ForgotPassword(FlaskForm):
     submit = SubmitField('Submit')
 
 class AddEducatorForm(FlaskForm):
-    first_name = StringField('First Name', validators=[DataRequired()], render_kw={"placeholder": "Enter your First Name"})
-    last_name = StringField('Last Name', validators=[DataRequired()], render_kw={"placeholder": "Enter your Last Name"})
+    first_name = StringField('First Name', validators=[DataRequired(), Regexp(r'^[A-Za-z]+$', message='First name must contain only letters')], render_kw={"placeholder": "Enter your First Name"})
+    last_name = StringField('Last Name', validators=[DataRequired(), Regexp(r'^[A-Za-z]+$', message='Last name must contain only letters')], render_kw={"placeholder": "Enter your Last Name"})
     rsa_id_num = StringField(
         'RSA ID Number', 
         validators=[
@@ -97,8 +97,8 @@ class ResetPassword(FlaskForm):
     submit = SubmitField('Submit')
 
 class AddSecretaryForm(FlaskForm):
-    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=30)], render_kw={"placeholder": "Enter your First Name"})
-    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=30)], render_kw={"placeholder": "Enter your Last Name"})
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=30), Regexp(r'^[A-Za-z]+$', message='First name must contain only letters')], render_kw={"placeholder": "Enter your First Name"})
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=30), Regexp(r'^[A-Za-z]+$', message='Last name must contain only letters')], render_kw={"placeholder": "Enter your Last Name"})
     rsa_id_num = StringField('RSA ID Number', validators=[
         DataRequired(), 
         Regexp(r'^\d{13}$', message='RSA ID must be exactly 13 digits')
@@ -111,13 +111,13 @@ class AddSecretaryForm(FlaskForm):
     submit = SubmitField('Add Secretary')
 
 class ManageProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()], render_kw={"placeholder": "Enter your username"})
+    username = StringField('Username', validators=[DataRequired(), Regexp(r'^[A-Za-z]+$', message='Username must contain only letters')], render_kw={"placeholder": "Enter your username"})
     email = StringField('Email', validators=[DataRequired()], render_kw={"placeholder": "Enter your email"})
     update_profile = SubmitField('Edit Details')
 
 class AddParentForm(FlaskForm):
-    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50)], render_kw={"placeholder": "Enter your First Name"})
-    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50)], render_kw={"placeholder": "Enter your Last Name"})
+    first_name = StringField('First Name', validators=[DataRequired(), Length(min=2, max=50), Regexp(r'^[A-Za-z]+$', message='First name must contain only letters')], render_kw={"placeholder": "Enter your First Name"})
+    last_name = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=50), Regexp(r'^[A-Za-z]+$', message='Last name must contain only letters')], render_kw={"placeholder": "Enter your Last Name"})
     rsa_id_num = StringField('RSA ID Number', validators=[
         DataRequired(), 
         Regexp(r'^\d{13}$', message='RSA ID must be exactly 13 digits')
@@ -181,15 +181,15 @@ class ExemptionForm(FlaskForm):
     start_date = DateField('Start Date', validators=[DataRequired()])
     end_date = DateField('End Date', validators=[DataRequired()])
     class_info = SelectField('Class', validators=[DataRequired()])
-    student_id = SelectField('Student ID', choices=[], validators=[DataRequired()], id='student-dropdown')
+    student_id = SelectField('Student ID', choices=[('James Adam', 'James Adam'), ('Paul Tim', 'Paul Tim')], validators=[DataRequired()], id='student-dropdown')
     reason = TextAreaField('Reason for Exemption', validators=[DataRequired()], id='class-info-dropdown')
     submit = SubmitField('Notify School')
 
 class StudentAttendanceForm(FlaskForm):
     first_name = StringField('First Name', render_kw={"readonly": True})
     last_name = StringField('Last Name', render_kw={"readonly": True})
-    notified = BooleanField('Notified', default=False, render_kw={"readonly": True})
-    status = SelectField('Status', choices=[('Present', 'Present'), ('Absent', 'Absent')], default='Present' if not notified else 'Absent')
+    notified = SelectField('Notified', choices=[('1', 'Yes'), ('0', 'No')], default='0')
+    status = SelectField('Status', choices=[('Present', 'Present'), ('Absent', 'Absent')])
 
     class Meta:
         csrf = False  # Disable CSRF for this nested form
@@ -207,3 +207,5 @@ class GenerateClassListForm(FlaskForm):
     submit_attendance = SubmitField('Submit Attendance')
 
 
+class DisplayForm(FlaskForm):
+    display_button = SubmitField('Display Students')

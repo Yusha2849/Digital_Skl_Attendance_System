@@ -1,0 +1,49 @@
+{% extends 'base.html' %} {% from 'bootstrap/form.html' import render_form %} {%
+block title %}Student Information{% endblock %} {% block content %}
+<h1 class="mb-4">Student Information</h1>
+
+<div class="box" style="width: 100%">
+  <form method="POST" action="" autocomplete="off">
+    {{ form.hidden_tag() }}
+    <!-- CSRF protection hidden field -->
+
+    <!-- Render the form's button -->
+    <div class="form-group">
+      {{ form.display_button(class="btn btn-primary mb-3") }}
+    </div>
+
+    <!-- Check if there are students to display -->
+    {% if students %}
+    <div class="table-container">
+      <table class="table table-bordered student-list">
+        <thead>
+          <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Grade</th>
+            <th>Division</th>
+            <th>Cell Number</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for student in students %}
+          <tr style="text-align: center">
+            <td>{{ student.first_name }}</td>
+            <td>{{ student.last_name }}</td>
+            <td>{{ student.grade }}</td>
+            <td>{{ student.division }}</td>
+            <td>{{ student.cell_number }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p>No students to display. Press the button to show the list.</p>
+    {% endif %}
+  </form>
+</div>
+
+<hr style="border: 1px solid #ccc; margin: 20px 0" />
+
+{% endblock %}

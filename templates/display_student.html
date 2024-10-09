@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Information</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .student-info {
+        background-color: #f4f4f4;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 50%;
+        margin: auto;
+      }
+      .student-info h1 {
+        color: #333;
+      }
+      .student-info p {
+        font-size: 18px;
+        color: #666;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="student-info">
+      <h1>Student Missing Alert</h1>
+      <p>
+        <strong>Student Name:</strong> {{ student.first_name }} {{
+        student.last_name }}
+      </p>
+      <p><strong>Guardian ID:</strong> {{ student.guardian_id }}</p>
+      <p><strong>Guardian Cell Number:</strong> {{ guardian.cell_number }}</p>
+      <p><strong>Guardian Address:</strong> {{ guardian.address }}</p>
+      <p><em>{{ student.first_name }} could possibly be missing!</em></p>
+    </div>
+  </body>
+</html>

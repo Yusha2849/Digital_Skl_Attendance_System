@@ -6,15 +6,19 @@ block content %}
     <thead>
       <tr>
         <th>Class ID</th>
+        <th>Grade</th>
+        <th>Division</th>
         <th>Students</th>
         <th>Educator ID</th>
       </tr>
     </thead>
     <tbody>
-      {% for schoolclass in schoolclasses %}
+      {% for schoolclass in classes %}
       <tr>
         <td>{{ schoolclass.class_id }}</td>
-        <td>{{ schoolclass.class_students | tojson }}</td>
+        <td>{{ schoolclass.grade }}</td>
+        <td>{{ schoolclass.division }}</td>
+        <td>{{ schoolclass.class_students | length }}</td>
         <td>{{ schoolclass.educator_id }}</td>
       </tr>
       {% else %}
